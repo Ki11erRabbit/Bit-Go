@@ -34,7 +34,7 @@ const (
 
 func update_step_view() {
 	gui_i.DeleteView("Steps")
-	if step_v, err := gui_i.SetView("Steps", max_x/2-len(bit_state_actions[current_state]),max_y/2-7,max_x/2+len(bit_state_actions[current_state]), max_y/2-5); err != nil {
+	if step_v, err := gui_i.SetView("Steps", max_x/2-len(bit_state_actions[current_state]),max_y/2-12,max_x/2+len(bit_state_actions[current_state]), max_y/2-10); err != nil {
 		if err != gocui.ErrUnknownView {
 			fmt.Println(err.Error())
 			os.Exit(1)
@@ -119,19 +119,19 @@ func RunGui() {
 
 	var x0, y0, x1, y1 int
 	
-	if world_width % 2 != 0 {
-		x0 = max_x/2 - (world_width/2)
-		x1 = max_x/2 + (world_width/2) +1
+	if (world_width * 5) % 2 != 0 {
+		x0 = max_x/2 - (world_width*5/2)
+		x1 = max_x/2 + (world_width*5/2) +2
 	} else {
-		x0 = max_x/2 - (world_width/2)
-		x1 = max_x/2 + (world_width/2)
+		x0 = max_x/2 - (world_width*5/2)
+		x1 = max_x/2 + (world_width*5/2) +1
 	}
-	if world_height % 2 != 0 {
-		y0 = max_y/2 - (world_height/2)
-		y1 = max_y/2 + (world_height/2) +1
+	if (world_height*3) % 2 != 0 {
+		y0 = max_y/2 - (world_height*3/2)
+		y1 = max_y/2 + (world_height*3/2) -1
 	} else {
-		y0 = max_y/2 - (world_height/2)
-		y1 = max_y/2 + (world_height/2)
+		y0 = max_y/2 - (world_height*3/2)
+		y1 = max_y/2 + (world_height*3/2) -2
 	}
 		
 	
@@ -182,7 +182,7 @@ func RunGui() {
 	}
 
 
-	if step_v, err := gui.SetView("Steps", max_x/2-len(bit_state_actions[current_state]),max_y/2-7,max_x/2+len(bit_state_actions[current_state]), max_y/2-5); err != nil {
+	if step_v, err := gui.SetView("Steps", max_x/2-len(bit_state_actions[current_state]),max_y/2-12,max_x/2+len(bit_state_actions[current_state]), max_y/2-10); err != nil {
 		if err != gocui.ErrUnknownView {
 			fmt.Println(err.Error())
 			os.Exit(1)
@@ -194,7 +194,7 @@ func RunGui() {
 		fmt.Fprintln(step_view, current_state, ": ", bit_state_actions[current_state])
 	}
 
-	if help_view, err := gui.SetView("Help", max_x/2 - len(HelpText)/2 -1, max_y/2+(world_height), max_x/2+len(HelpText)/2 +1, max_y/2+(world_height) +2); err != nil {
+	if help_view, err := gui.SetView("Help", max_x/2 - len(HelpText)/2 -1, max_y/2+(world_height)+2, max_x/2+len(HelpText)/2 +1, max_y/2+(world_height) +4); err != nil {
 		if err != gocui.ErrUnknownView {
 			fmt.Println(err.Error())
 			os.Exit(1)
@@ -386,69 +386,43 @@ func new_bit(direction string, world [][]Square, final_world[][]Square) *Bit {
 
 func print_world(v *gocui.View, face string, world [][]Square) {
 	for _, row := range world {
-		for _, square := range row {
-			if square.has_bit {
-				switch square.color {
-				case White:
-					fmt.Fprint(v, "\x1b[36;47m",face)
-				case Red:
-					fmt.Fprint(v, "\x1b[36;41m",face)
-				case Blue:
-					fmt.Fprint(v, "\x1b[36;44m",face)
-				case Green:
-					fmt.Fprint(v, "\x1b[36;42m",face)
-				default: 
-					fmt.Fprint(v, "\x1b[36;47m",face)
+			for i := 0; i < 3; i++ {
+				for _, square := range row {
+				
+					if square.has_bit && i == 1 {
+						switch square.color {
+						case White:
+							fmt.Fprint(v, "\x1b[36;47m  ",face, "  ")
+						case Red:
+							fmt.Fprint(v, "\x1b[36;41m  ",face, "  ")
+						case Blue:
+							fmt.Fprint(v, "\x1b[36;44m  ",face, "  ")
+						case Green:
+							fmt.Fprint(v, "\x1b[36;42m  ",face, "  ")
+						default: 
+							fmt.Fprint(v, "\x1b[36;47m  ",face, "  ")
+						}
+					} else {
+						switch square.color {
+						case White:
+							fmt.Fprint(v, "\x1b[36;47m     ")
+						case Black:
+							fmt.Fprint(v, "\x1b[36;40m     ")
+						case Red:
+							fmt.Fprint(v, "\x1b[36;41m     ")
+						case Blue:
+							fmt.Fprint(v, "\x1b[36;44m     ")
+						case Green:
+							fmt.Fprint(v, "\x1b[36;42m     ")
+						default: 
+							fmt.Fprint(v, "\x1b[36;47m     ")
+						}
+					}
 				}
-			} else {
-				switch square.color {
-				case White:
-					fmt.Fprint(v, "\x1b[36;47m ")
-				case Black:
-					fmt.Fprint(v, "\x1b[36;40m ")
-				case Red:
-					fmt.Fprint(v, "\x1b[36;41m ")
-				case Blue:
-					fmt.Fprint(v, "\x1b[36;44m ")
-				case Green:
-					fmt.Fprint(v, "\x1b[36;42m ")
-				default: 
-					fmt.Fprint(v, "\x1b[36;47m ")
-				}
-			}
+			fmt.Fprintln(v)
 		}
-		fmt.Fprintln(v)
 	}
 }
-
-/*func (bit *bit) print_world_with_bit() {
-	for _, row := range bit.world {
-		for _, square := range row {
-			if square.has_bit {
-				fmt.Print(bit.face)
-			} else {
-				fmt.Print(square.symbol)
-			}
-		}
-		fmt.Println("\n")
-	}
-}
-
-func (bit *bit) print_world_without_bit() {
-	for _, row := range bit.world {
-		for _, square := range row {
-			fmt.Print(square.symbol)
-		}
-		fmt.Println("\n")
-	}
-}
-
-func (bit *bit) print_world() {
-	if bit.
-	bit.print_world_with_bit()
-	fmt.Println("--------------------")
-	bit.print_world_without_bit()
-}*/
 
 func (bit *Bit) Move() {
 	if error_occured != nil {
@@ -471,13 +445,6 @@ func (bit *Bit) Move() {
 		return
 	}
 	add_bit_state(bit, "move     ")
-	/*fmt.Println("Step  #", b.steps)
-	b.print_world()
-	if result != nil {
-		stop_display_error(result.Error())
-	}
-	fmt.Println("--------------------")
-	pause()*/
 }
 
 func (b *Bit) moveUp() error {
@@ -573,10 +540,6 @@ func (b *Bit) Right() {
 		b.face = BitDown
 	}
 	add_bit_state(b, "right       ")
-	/*fmt.Println("Step  #", b.steps)
-	print_world(b.world)
-	fmt.Println("--------------------")
-	pause()*/
 }
 
 func (bit *Bit) Paint(color string) {
