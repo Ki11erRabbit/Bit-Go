@@ -39,9 +39,7 @@ func update_step_view() {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-
-		step_view = step_v
-		fmt.Fprintln(step_view, current_state, ": ", bit_state_actions[current_state])
+		fmt.Fprintln(step_v, current_state, ": ", bit_state_actions[current_state])
 	}
 }
 
@@ -101,9 +99,75 @@ func quit(gui *gocui.Gui, view *gocui.View) error {
 	return gocui.ErrQuit
 }
 
+func reset_gui_globals() {
+	gui_i = nil
+	max_x = 0
+	max_y = 0
+}
+
 var gui_i *gocui.Gui = nil
 var max_x int = 0
 var max_y int = 0
+
+
+func setup_world_view(gui *gocui.Gui, x0 int, y0 int, x1 int, y1 int) error {
+	
+	if world, err := gui.SetView("World", x0, y0, x1, y1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		current_state = len(bit_states) - 1
+
+		print_world(world, bit_states[current_state].face, bit_states[current_state].world)
+
+		if err := gui.SetKeybinding("World", rune('n'), gocui.ModNone, next_state); err != nil {
+			return err
+		}
+		if err := gui.SetKeybinding("World", rune('p'), gocui.ModNone, prev_state); err != nil {
+			return err
+		}
+		if err := gui.SetKeybinding("World", rune('f'), gocui.ModNone, first_state); err != nil {
+			return err
+		}
+		if err := gui.SetKeybinding("World", rune('l'), gocui.ModNone, last_state); err != nil {
+			return err
+		}
+		if err := gui.SetKeybinding("", rune('q'), gocui.ModNone, quit); err != nil {
+			return err
+		}
+		if err := gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
+			return err
+		}
+		if err := gui.SetKeybinding("World", rune('s'), gocui.ModNone, switch_world); err != nil {
+			return err
+		}
+		if _, err := gui.SetCurrentView("World"); err != nil {
+			return err
+		} 
+	}
+	return nil
+}
+
+func setup_step_view(gui *gocui.Gui, x0 int, y0 int, x1 int, y1 int) error {
+	if step_view, err := gui.SetView("Steps", x0, y0, x1, y1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		fmt.Fprintln(step_view, current_state, ": ", bit_state_actions[current_state])
+	}
+	return nil
+}
+
+func setup_help_view(gui *gocui.Gui, x0 int, y0 int, x1 int, y1 int) error {
+	
+	if help_view, err := gui.SetView("Help", x0, y0, x1, y1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		fmt.Fprintln(help_view, HelpText)
+	}
+	return nil
+}
 
 func RunGui() {
 	gui, err := gocui.NewGui(gocui.OutputNormal)
@@ -112,6 +176,7 @@ func RunGui() {
 		os.Exit(1)
 	}
 	defer gui.Close()
+	defer reset_gui_globals()
 	
 	gui_i = gui
 
@@ -135,71 +200,29 @@ func RunGui() {
 	}
 		
 	
-	if world, err := gui.SetView("World", x0, y0, x1, y1); err != nil {
+	if err := setup_world_view(gui, x0, y0, x1, y1); err != nil {
 		if err != gocui.ErrUnknownView {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		current_state = len(bit_states) - 1
-
-		print_world(world, bit_states[current_state].face, bit_states[current_state].world)
-
-		if err := gui.SetKeybinding("World", rune('n'), gocui.ModNone, next_state); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := gui.SetKeybinding("World", rune('p'), gocui.ModNone, prev_state); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := gui.SetKeybinding("World", rune('f'), gocui.ModNone, first_state); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := gui.SetKeybinding("World", rune('l'), gocui.ModNone, last_state); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := gui.SetKeybinding("", rune('q'), gocui.ModNone, quit); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if err := gui.SetKeybinding("World", rune('s'), gocui.ModNone, switch_world); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		if _, err := gui.SetCurrentView("World"); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		} else {
+			fmt.Println(err.Error())
+			os.Exit(1)
 		}
-
-		
 	}
 
 
-	if step_v, err := gui.SetView("Steps", max_x/2-len(bit_state_actions[current_state]),max_y/2-12,max_x/2+len(bit_state_actions[current_state]), max_y/2-10); err != nil {
+	if err := setup_step_view(gui, max_x/2-len(bit_state_actions[current_state]),max_y/2-12,max_x/2+len(bit_state_actions[current_state]), max_y/2-10); err != nil {
 		if err != gocui.ErrUnknownView {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-
-		step_view = step_v
-
-
-		fmt.Fprintln(step_view, current_state, ": ", bit_state_actions[current_state])
 	}
 
-	if help_view, err := gui.SetView("Help", max_x/2 - len(HelpText)/2 -1, max_y/2+(world_height)+2, max_x/2+len(HelpText)/2 +1, max_y/2+(world_height) +4); err != nil {
+	if err := setup_help_view(gui, max_x/2 - len(HelpText)/2 -1, max_y/2+(world_height)+2, max_x/2+len(HelpText)/2 +1, max_y/2+(world_height) +4); err != nil {
 		if err != gocui.ErrUnknownView {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		fmt.Fprintln(help_view, "n: next step    p: previous step    f: first step    l: last step    s: switch world    q: quit")
 	}
 
 	if err := gui.MainLoop(); err != nil && err != gocui.ErrQuit {
@@ -208,8 +231,16 @@ func RunGui() {
 
 }
 
-var step_view *gocui.View = nil
-
+func reset_bit_globals() {
+	bit_snapshots = make([]int, 0)
+	current_snapshot = 0
+	current_state = 0
+	bit_states = make([]*Bit, 1)
+	bit_state_actions = make([]string, 1)
+	error_occured = nil
+	world_width = 0
+	world_height = 0
+}
 
 var bit_snapshots []int = make([]int, 0)
 
@@ -308,6 +339,7 @@ func load_world(file_name string) [][]Square {
 }
 
 func GetBit(start_world string, end_world string) *Bit {
+	reset_bit_globals()
 	file, err := os.Open(start_world)
 	if err != nil {
 		fmt.Println(err.Error())
