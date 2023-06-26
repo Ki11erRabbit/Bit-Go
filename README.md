@@ -43,11 +43,13 @@ xxx-----
 0 0
 ```
 ```
+d
 bbbbbbrrrrrrrrr
 b-bb-b---------
 bbbbbbrrrrrrrrr
 ---------------
 rrrrrrrrrrrrrrr
+3 3
 ```
 ## Bit Reference
 * Moving
